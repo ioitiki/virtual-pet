@@ -4,10 +4,12 @@ import java.util.List;
 
 public class Person {
   private String name;
+  private String email;
   private int id;
 
-  public Person(String name) {
+  public Person(String name, String email) {
     this.name = name;
+    this.email = email;
   }
 
   public int getId() {
@@ -18,11 +20,16 @@ public class Person {
     return name;
   }
 
+  public String getEmail() {
+    return email;
+  }
+
   public void save() {
     try (Connection con = DB.sql2o.open()) {
-      String sql = "INSERT INTO persons (name) VALUES (:name);";
+      String sql = "INSERT INTO persons (name, email) VALUES (:name, :email);";
       this.id = (int) con.createQuery(sql, true)
         .addParameter("name", this.name)
+        .addParameter("email", this.email)
         .executeUpdate()
         .getKey();
     }
@@ -43,6 +50,7 @@ public class Person {
     } else {
       Person newPerson = (Person) otherPerson;
       return this.getName().equals(newPerson.getName()) &&
+             this.getEmail().equals(newPerson.getEmail()) &&
              this.getId() == newPerson.getId();
     }
   }
@@ -56,12 +64,13 @@ public class Person {
     }
   }
 
-  public void updatePerson(String name) {
+  public void updatePerson(String name, String email) {
     this.name = name;
     try (Connection con = DB.sql2o.open()) {
-      String sql = "UPDATE persons SET name = :name WHERE id = :id;";
+      String sql = "UPDATE persons SET (name, email) = (:name, :email) WHERE id = :id;";
       con.createQuery(sql)
         .addParameter("name", name)
+        .addParameter("email", email)
         .addParameter("id", this.id)
         .executeUpdate();
     }
