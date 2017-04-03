@@ -1,7 +1,8 @@
 import org.sql2o.*;
 import java.util.List;
 import java.sql.Timestamp;
-import java.util.Date;
+import java.sql.Date;
+// import java.util.Date;
 import java.util.ArrayList;
 
 public class Monster {
@@ -62,19 +63,20 @@ public class Monster {
     return lastPlayed;
   }
 
+  public Timestamp getBirthday() {
+    return birthday;
+  }
+
   public int getId(){
     return id;
   }
 
   public void save(){
     try (Connection con = DB.sql2o.open()) {
-      String sql = "INSERT INTO monsters (name, personId, playLevel, sleepLevel, foodLevel) VALUES (:name, :personId, :playLevel, :sleepLevel, :foodLevel);";
+      String sql = "INSERT INTO monsters (name, personId, birthday) VALUES (:name, :personId, now());";
       this.id = (int) con.createQuery(sql, true)
         .addParameter("name", this.name)
         .addParameter("personId", this.personId)
-        .addParameter("playLevel", this.playLevel)
-        .addParameter("sleepLevel", this.sleepLevel)
-        .addParameter("foodLevel", this.foodLevel)
         .executeUpdate()
         .getKey();
     }
@@ -96,10 +98,16 @@ public class Monster {
       Monster newMonster = (Monster) otherMonster;
       return this.getName().equals(newMonster.getName()) &&
              this.getPersonId() == newMonster.getPersonId() &&
-             this.getPlayLevel() == newMonster.getPlayLevel() &&
-             this.getSleepLevel() == newMonster.getSleepLevel() &&
-             this.getFoodLevel() == newMonster.getFoodLevel() &&
              this.getId() == newMonster.getId();
+    }
+  }
+
+  public static Monster find(int id) {
+    try (Connection con = DB.sql2o.open()) {
+      String sql = "SELECT * FROM monsters WHERE id = :id;";
+      return con.createQuery(sql)
+        .addParameter("id", id)
+        .executeAndFetchFirst(Monster.class);
     }
   }
 
@@ -114,6 +122,45 @@ public class Monster {
     playLevel--;
     foodLevel--;
     sleepLevel--;
+  }
+
+  public void sleep(){
+    if (sleepLevel >= MAX_SLEEP_LEVEL){
+      throw new UnsupportedOperationException("You cannot make your monster sleep anymore!");
+    }
+    try(Connection con = DB.sql2o.open()) {
+      String sql = "UPDATE monsters SET lastslept = now() WHERE id = :id";
+      con.createQuery(sql)
+        .addParameter("id", id)
+        .executeUpdate();
+      }
+    sleepLevel++;
+  }
+
+  public void play(){
+    if (playLevel >= MAX_PLAY_LEVEL){
+      throw new UnsupportedOperationException("You cannot play with monster anymore!");
+    }
+    try(Connection con = DB.sql2o.open()) {
+      String sql = "UPDATE monsters SET lastplayed = now() WHERE id = :id";
+      con.createQuery(sql)
+        .addParameter("id", id)
+        .executeUpdate();
+      }
+    playLevel++;
+  }
+
+  public void feed(){
+    if (foodLevel >= MAX_FOOD_LEVEL){
+      throw new UnsupportedOperationException("You cannot feed your monster anymore!");
+    }
+    try(Connection con = DB.sql2o.open()) {
+      String sql = "UPDATE monsters SET lastate = now() WHERE id = :id";
+      con.createQuery(sql)
+        .addParameter("id", id)
+        .executeUpdate();
+      }
+    foodLevel++;
   }
 
 }
