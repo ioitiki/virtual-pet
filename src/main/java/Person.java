@@ -1,6 +1,6 @@
 import org.sql2o.*;
 import java.util.List;
-import java.util.List;
+import java.util.ArrayList;
 
 public class Person {
   private String name;
@@ -74,6 +74,27 @@ public class Person {
         .addParameter("id", this.id)
         .executeUpdate();
     }
+ }
+
+ public List<Object> getMonsters() {
+   List<Object> allMonsters = new ArrayList<Object>();
+
+   try (Connection con = DB.sql2o.open()) {
+     String sqlFire = "SELECT * FROM monsters WHERE personId = :id AND type = 'fire';";
+     List<FireMonster> fireMonsters = con.createQuery(sqlFire)
+      .addParameter("id", this.id)
+      .throwOnMappingFailure(false)
+      .executeAndFetch(FireMonster.class);
+    allMonsters.addAll(fireMonsters);
+
+      String sqlWater = "SELECT * FROM monsters WHERE personId = :id AND type = 'water';";
+      List<WaterMonster> waterMonsters = con.createQuery(sqlWater)
+        .addParameter("id", this.id)
+        .throwOnMappingFailure(false)
+        .executeAndFetch(WaterMonster.class);
+      allMonsters.addAll(waterMonsters);
+   }
+   return allMonsters;
  }
 
 }
