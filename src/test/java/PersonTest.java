@@ -89,4 +89,16 @@ public class PersonTest {
     Object[] monsters = new Object[]{ testFireMonster, testWaterMonster};
     assertTrue(testPerson.getMonsters().containsAll(Arrays.asList(monsters)));
   }
+
+  @Test
+  public void leaveCommunity_removesAssociationWithSpecifiedCommunity() {
+    Community testCommunity = new Community("Fire Enthusiasts", "Flame on!");
+    testCommunity.save();
+    Person testPerson = new Person("Henry", "henry@henry.com");
+    testPerson.save();
+    testCommunity.addPerson(testPerson);
+    testPerson.leaveCommunity(testCommunity);
+    List savedCommunities = testPerson.getCommunities();
+    assertEquals(0, savedCommunities.size());
+  }
 }

@@ -104,4 +104,15 @@ public class CommunityTest {
     assertEquals(0, people.size());
   }
 
+  @Test
+  public void removePerson_removesAssociationWithSpecifiedCommunity() {
+    Community testCommunity = new Community("Fire Enthusiasts", "Flame on!");
+    testCommunity.save();
+    Person testPerson = new Person("Henry", "henry@henry.com");
+    testPerson.save();
+    testCommunity.removePerson(testPerson);
+    List savedPersons = testCommunity.getPersons();
+    assertEquals(0, savedPersons.size());
+  }
+
 }
